@@ -65,7 +65,6 @@ app.use(rateLimit({
 app.use(identityMiddleware);
 
 // ---------- Global View Locals ----------
-const CHAT_ROLES = require("./app/constants/roles");
 
 app.use((req, res, next) => {
   res.locals.user = req.user || null;

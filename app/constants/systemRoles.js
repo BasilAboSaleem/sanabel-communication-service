@@ -10,9 +10,4 @@ module.exports = {
   HR_DEPUTY: "hr.deputy",
   BOSS: "boss",
   VISITOR: "visitor",
-
-  // Chat-specific roles
-  CHAT_USER: "CHAT_USER",
-  CHAT_ADMIN: "CHAT_ADMIN",
-  CHAT_SUPERVISOR: "CHAT_SUPERVISOR",
 };

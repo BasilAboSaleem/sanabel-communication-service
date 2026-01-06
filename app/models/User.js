@@ -1,17 +1,14 @@
-// ===========================
-// User Shadow Model
-// ===========================
-
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true, unique: true }, // من HR System
+    userId: { type: String, required: true, unique: true }, // from core system
     name: { type: String, required: true },
-    role: { type: String, required: true }, // HR System role
-    chatRole: { type: String, required: true }, // Chat service role
-    companyId: { type: String },
-    department: { type: String },
+
+    systemRole: { type: String, required: true },
+    chatRole: { type: String, required: true },
+
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

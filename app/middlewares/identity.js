@@ -3,28 +3,14 @@
 // ===============================
 
 const User = require("../models/User");
+const roleMapping = require("../constants/roleMapping");
+const rolePermissions = require("../constants/rolePermissions");
 
-// Role mapping from HR System → Chat Role
-const roleMap = {
-  "hr.employee.manager": "CHAT_ADMIN",
-  "hr.employee": "CHAT_USER",
-  "hr.manager": "CHAT_ADMIN",
-  "hr.deputy": "CHAT_ADMIN",
-  "boss": "CHAT_SUPERVISOR",
-  "visitor": "CHAT_USER",
-};
-
-// Permissions for each Chat Role
-const permissionsMap = {
-  CHAT_USER: ["chat.read", "chat.send"],
-  CHAT_ADMIN: ["chat.read", "chat.send", "chat.delete_own", "chat.manage_group"],
-  CHAT_SUPERVISOR: ["chat.read", "chat.send", "chat.delete_any", "chat.manage_group"],
-};
-
-// Middleware for REST
+// ===============================
+// REST Identity Middleware
+// ===============================
 async function identityMiddleware(req, res, next) {
   try {
-    // 1️⃣ Read token (example: JWT in Authorization header)
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ error: "No token provided" });
@@ -32,34 +18,37 @@ async function identityMiddleware(req, res, next) {
 
     const token = authHeader.split(" ")[1];
 
-    // 2️⃣ Decode token (replace with real JWT verification)
-    // Here we simulate decoding for V1 (fake token)
-    const decoded = fakeDecodeToken(token); // replace with real JWT verify in prod
+    // Fake decode (V1)
+    const decoded = fakeDecodeToken(token);
 
-    const hrRole = decoded.role;
-    const chatRole = roleMap[hrRole] || "CHAT_USER";
-    const permissions = permissionsMap[chatRole] || [];
+    const systemRole = decoded.role;
 
-    // 3️⃣ Upsert User Shadow in MongoDB
+    // 🔑 map system role → chat role
+    const chatRole = roleMapping[systemRole] || "chat.visitor";
+
+    // 🔐 load permissions by chat role
+    const permissions = rolePermissions[chatRole] || [];
+
+    // Shadow user
     let user = await User.findOne({ userId: decoded.userId });
+
     if (!user) {
       user = await User.create({
         userId: decoded.userId,
         name: decoded.name,
-        role: hrRole,
+        systemRole,
         chatRole,
       });
     } else {
+      user.systemRole = systemRole;
       user.chatRole = chatRole;
-      user.role = hrRole;
       await user.save();
     }
 
-    // 4️⃣ Attach to req.user
     req.user = {
       id: user.userId,
       name: user.name,
-      role: hrRole,
+      systemRole,
       chatRole,
       permissions,
       companyId: decoded.companyId || null,
@@ -69,11 +58,13 @@ async function identityMiddleware(req, res, next) {
     next();
   } catch (err) {
     console.error("Identity Middleware Error:", err);
-    return res.status(401).json({ error: "Invalid token or user" });
+    return res.status(401).json({ error: "Invalid token" });
   }
 }
 
-// Middleware for Socket.io
+// ===============================
+// Socket.io Identity Middleware
+// ===============================
 async function socketIdentity(socket, next) {
   try {
     const token = socket.handshake.auth?.token;
@@ -81,31 +72,31 @@ async function socketIdentity(socket, next) {
       return next(new Error("No token provided"));
     }
 
-    const decoded = fakeDecodeToken(token); // replace with real JWT verification
+    const decoded = fakeDecodeToken(token);
 
-    const hrRole = decoded.role;
-    const chatRole = roleMap[hrRole] || "CHAT_USER";
-    const permissions = permissionsMap[chatRole] || [];
+    const systemRole = decoded.role;
+    const chatRole = roleMapping[systemRole] || "chat.visitor";
+    const permissions = rolePermissions[chatRole] || [];
 
-    // Upsert User Shadow
     let user = await User.findOne({ userId: decoded.userId });
+
     if (!user) {
       user = await User.create({
         userId: decoded.userId,
         name: decoded.name,
-        role: hrRole,
+        systemRole,
         chatRole,
       });
     } else {
+      user.systemRole = systemRole;
       user.chatRole = chatRole;
-      user.role = hrRole;
       await user.save();
     }
 
     socket.user = {
       id: user.userId,
       name: user.name,
-      role: hrRole,
+      systemRole,
       chatRole,
       permissions,
       companyId: decoded.companyId || null,
@@ -119,10 +110,13 @@ async function socketIdentity(socket, next) {
   }
 }
 
-// ======= Fake JWT Decode for V1 (replace in production) =======
+// ===============================
+// Fake Decode (V1 only)
+// ===============================
 function fakeDecodeToken(token) {
-  // Example: token = "userId:name:role:companyId"
+  // userId:name:role:companyId:department
   const parts = token.split(":");
+
   return {
     userId: parts[0] || "u123",
     name: parts[1] || "John Doe",
