@@ -1,37 +1,40 @@
-// ===============================
-// Identity Middleware for V1
-// ===============================
-
 const User = require("../models/User");
 const roleMapping = require("../constants/roleMapping");
 const rolePermissions = require("../constants/rolePermissions");
+const CHAT_ROLES = require("../constants/chatRoles"); // تأكد أن هذا السطر موجود قبل أي استخدام
 
 // ===============================
 // REST Identity Middleware
 // ===============================
 async function identityMiddleware(req, res, next) {
   try {
+    let decoded;
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ error: "No token provided" });
+
+    if (!authHeader) { 
+      // مؤقت: Fake User
+      decoded = {
+        userId: "u123",
+        name: "John Doe",
+        role: "hr.employee",
+        companyId: "company1",
+        department: "HR",
+      };
+    } else {
+      const token = authHeader.split(" ")[1];
+      decoded = fakeDecodeToken(token);
     }
-
-    const token = authHeader.split(" ")[1];
-
-    // Fake decode (V1)
-    const decoded = fakeDecodeToken(token);
 
     const systemRole = decoded.role;
 
     // 🔑 map system role → chat role
-    const chatRole = roleMapping[systemRole] || "chat.visitor";
+    const chatRole = roleMapping[systemRole] || CHAT_ROLES.VISITOR;
 
     // 🔐 load permissions by chat role
     const permissions = rolePermissions[chatRole] || [];
 
     // Shadow user
     let user = await User.findOne({ userId: decoded.userId });
-
     if (!user) {
       user = await User.create({
         userId: decoded.userId,
@@ -67,19 +70,27 @@ async function identityMiddleware(req, res, next) {
 // ===============================
 async function socketIdentity(socket, next) {
   try {
+    let decoded;
     const token = socket.handshake.auth?.token;
-    if (!token) {
-      return next(new Error("No token provided"));
+
+    if (!token) { 
+      // مؤقت: Fake User
+      decoded = {
+        userId: "u123",
+        name: "John Doe",
+        role: "hr.employee",
+        companyId: "company1",
+        department: "HR",
+      };
+    } else {
+      decoded = fakeDecodeToken(token);
     }
 
-    const decoded = fakeDecodeToken(token);
-
     const systemRole = decoded.role;
-    const chatRole = roleMapping[systemRole] || "chat.visitor";
+    const chatRole = roleMapping[systemRole] || CHAT_ROLES.VISITOR;
     const permissions = rolePermissions[chatRole] || [];
 
     let user = await User.findOne({ userId: decoded.userId });
-
     if (!user) {
       user = await User.create({
         userId: decoded.userId,
@@ -114,9 +125,7 @@ async function socketIdentity(socket, next) {
 // Fake Decode (V1 only)
 // ===============================
 function fakeDecodeToken(token) {
-  // userId:name:role:companyId:department
   const parts = token.split(":");
-
   return {
     userId: parts[0] || "u123",
     name: parts[1] || "John Doe",

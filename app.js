@@ -9,11 +9,12 @@ const path = require("path");
 const morgan = require("morgan");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const CHAT_ROLES = require("./app/constants/chatRoles");
 
 // ---------- Config / DB ----------
 const connectDB = require("./config/db");     // MongoDB
 const redis = require("./config/redis");      // Redis
-
+ 
 // ---------- Middlewares ----------
 const { identityMiddleware } = require("./app/middlewares/identity");
 
@@ -36,7 +37,6 @@ redis.on("error", (err) => console.error("❌ Redis error:", err));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// i18n (optional – ready for RTL / multi-lang)
 
 
 // Static files
@@ -73,10 +73,11 @@ app.use((req, res, next) => {
 });
 
 // ---------- Routes ----------
-//
+const indexRoutes = require("./app/routes/index");
 
 // UI routes
 //app.use("/", dashboardRoutes);
+app.use('/', indexRoutes);
 
 // API routes (REST – secondary)
 //app.use("/api/chat", chatRoutes);
