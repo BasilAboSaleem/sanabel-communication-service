@@ -15,7 +15,7 @@ const connectDB = require("./config/db");     // MongoDB
 const redis = require("./config/redis");      // Redis
 
 // ---------- Middlewares ----------
-//
+const { identityMiddleware } = require("./app/middlewares/identity");
 
 // ---------- App Initialization ----------
 const app = express();
@@ -37,7 +37,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // i18n (optional – ready for RTL / multi-lang)
-i18nMiddleware(app);
+
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
