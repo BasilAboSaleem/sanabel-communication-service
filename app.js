@@ -72,6 +72,16 @@ app.use((req, res, next) => {
   next();
 });
 
+const sidebarLinks = require("./app/constants/sidebarLinks");
+
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  res.locals.CHAT_ROLES = require("./app/constants/chatRoles");
+  res.locals.sidebarLinks = req.user ? sidebarLinks[req.user.chatRole] || [] : [];
+  next();
+});
+
+
 // ---------- Routes ----------
 const indexRoutes = require("./app/routes/index");
 
