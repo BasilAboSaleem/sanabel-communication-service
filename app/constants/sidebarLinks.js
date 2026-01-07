@@ -1,24 +1,48 @@
-// app/constants/sidebarLinks.js
+// ===========================
+// Sidebar Links حسب Chat Role
+// ===========================
+
+const CHAT = require("./chatRoles");
+
 module.exports = {
-  [require("./chatRoles").OWNER]: [
-    { name: "Dashboard", icon: "bi bi-grid-fill", link: "/dashboard" },
-    { name: "User Management", icon: "bi bi-people-fill", link: "/users" },
-    { name: "Settings", icon: "bi bi-gear-fill", link: "/settings" },
+  [CHAT.OWNER]: [
+    { section: "Main", items: [{ id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" }] },
+    { section: "Management", items: [
+      { id: "users", label: "إدارة المستخدمين", icon: "bi bi-people-fill", path: "/users" },
+      { id: "groups", label: "إدارة المجموعات", icon: "bi bi-collection-fill", path: "/groups" },
+      { id: "audit", label: "سجل التدقيق", icon: "bi bi-journal-text", path: "/audit" },
+      { id: "settings", label: "الإعدادات", icon: "bi bi-gear-fill", path: "/settings" },
+    ]},
   ],
-  [require("./chatRoles").ADMIN]: [
-    { name: "Dashboard", icon: "bi bi-grid-fill", link: "/dashboard" },
-    { name: "Reports", icon: "bi bi-file-earmark-text-fill", link: "/reports" },
+
+  [CHAT.ADMIN]: [
+    { section: "Main", items: [{ id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" }] },
+    { section: "Department", items: [
+      { id: "dept-chat", label: "تواصل القسم", icon: "bi bi-chat-dots-fill", path: "/chat/department" },
+      { id: "reports", label: "تقارير", icon: "bi bi-file-earmark-text-fill", path: "/reports" },
+    ]},
   ],
-  [require("./chatRoles").SUPERVISOR]: [
-    { name: "Dashboard", icon: "bi bi-grid-fill", link: "/dashboard" },
-    { name: "Team Chat", icon: "bi bi-chat-dots-fill", link: "/chat" },
+
+  [CHAT.SUPERVISOR]: [
+    { section: "Main", items: [{ id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" }] },
+    { section: "Work", items: [
+      { id: "program-chat", label: "تواصل البرنامج/المشروع", icon: "bi bi-chat-dots-fill", path: "/chat/program" },
+      { id: "tasks", label: "المهام", icon: "bi bi-check2-square", path: "/tasks" },
+    ]},
   ],
-  [require("./chatRoles").USER]: [
-    { name: "Dashboard", icon: "bi bi-grid-fill", link: "/dashboard" },
-    { name: "My Tasks", icon: "bi bi-check2-square", link: "/tasks" },
+
+  [CHAT.USER]: [
+    { section: "My Area", items: [
+      { id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" },
+      { id: "my-chat", label: "محادثاتي", icon: "bi bi-chat-dots-fill", path: "/chat" },
+      { id: "tasks", label: "مهامي", icon: "bi bi-check2-square", path: "/tasks" },
+    ]},
   ],
-  [require("./chatRoles").VISITOR]: [
-    { name: "Home", icon: "bi bi-house-fill", link: "/" },
-    { name: "Contact", icon: "bi bi-envelope-fill", link: "/contact" },
+
+  [CHAT.VISITOR]: [
+    { section: "Limited Access", items: [
+      { id: "home", label: "الرئيسية", icon: "bi bi-house-fill", path: "/" },
+      { id: "contact-supervisor", label: "تواصل مع المشرف", icon: "bi bi-envelope-fill", path: "/chat/supervisor" },
+    ]},
   ],
 };

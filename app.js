@@ -81,6 +81,9 @@ app.use((req, res, next) => {
   next();
 });
 
+const sidebarMiddleware = require("./app/middlewares/sidebar");
+
+app.use(sidebarMiddleware);
 
 // ---------- Routes ----------
 const indexRoutes = require("./app/routes/index");

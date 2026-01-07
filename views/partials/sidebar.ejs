@@ -6,16 +6,21 @@
 
     <div class="sidebar-menu">
       <ul class="menu">
-        <li class="sidebar-title">Menu</li>
 
-        <% sidebarLinks.forEach(item => { %>
-          <li class="sidebar-item">
-            <a href="<%= item.link %>" class="sidebar-link">
-              <i class="<%= item.icon %>"></i>
-              <span><%= item.name %></span>
-            </a>
-          </li>
+        <% sidebar.forEach(section => { %>
+          <li class="sidebar-title"><%= section.section %></li>
+
+          <% section.items.forEach(item => { %>
+            <li class="sidebar-item <%= item.active ? 'active' : '' %>">
+              <a href="<%= item.path %>" class="sidebar-link">
+                <i class="<%= item.icon %>"></i>
+                <span><%= item.label %></span>
+              </a>
+            </li>
+          <% }) %>
+
         <% }) %>
+
       </ul>
     </div>
   </div>

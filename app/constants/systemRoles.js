@@ -1,5 +1,5 @@
 // ===========================
-// Roles Constants for Chat Service
+// Roles Constants for Chat Service 
 // ===========================
 
 // هذا مثال للـ roles اللي أرسلها لك الفريق (HR System → Chat mapping)

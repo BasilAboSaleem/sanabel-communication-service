@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const roleMapping = require("../constants/roleMapping");
 const rolePermissions = require("../constants/rolePermissions");
-const CHAT_ROLES = require("../constants/chatRoles"); // تأكد أن هذا السطر موجود قبل أي استخدام
+const CHAT_ROLES = require("../constants/chatRoles");
 
 // ===============================
 // REST Identity Middleware
@@ -11,12 +11,14 @@ async function identityMiddleware(req, res, next) {
     let decoded;
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) { 
-      // مؤقت: Fake User
+    if (!authHeader) {
+      // TEMP: Fake User for testing
       decoded = {
         userId: "u123",
         name: "John Doe",
-        role: "hr.employee",
+        role: "boss",           // System Role
+        jobTitle: "مدير المؤسسة", // Job Title
+        scope: "Global",        // Global / Department / Program / Project / Personal
         companyId: "company1",
         department: "HR",
       };
@@ -25,15 +27,21 @@ async function identityMiddleware(req, res, next) {
       decoded = fakeDecodeToken(token);
     }
 
+    // === Determine chatRole and scope using jobTitle first, then systemRole ===
+    const mapping =
+      (decoded.jobTitle && roleMapping[decoded.jobTitle]) ||
+      roleMapping[decoded.role] ||
+      { chatRole: CHAT_ROLES.VISITOR, scope: "Limited" };
+
     const systemRole = decoded.role;
+    const chatRole = mapping.chatRole;
+    const scope = mapping.scope;
 
-    // 🔑 map system role → chat role
-    const chatRole = roleMapping[systemRole] || CHAT_ROLES.VISITOR;
+    // Load permissions for the chatRole
+    let permissions = rolePermissions[chatRole] || [];
+    permissions = filterPermissionsByScope(permissions, scope);
 
-    // 🔐 load permissions by chat role
-    const permissions = rolePermissions[chatRole] || [];
-
-    // Shadow user
+    // Shadow user in MongoDB
     let user = await User.findOne({ userId: decoded.userId });
     if (!user) {
       user = await User.create({
@@ -41,10 +49,12 @@ async function identityMiddleware(req, res, next) {
         name: decoded.name,
         systemRole,
         chatRole,
+        scope,
       });
     } else {
       user.systemRole = systemRole;
       user.chatRole = chatRole;
+      user.scope = scope;
       await user.save();
     }
 
@@ -54,6 +64,7 @@ async function identityMiddleware(req, res, next) {
       systemRole,
       chatRole,
       permissions,
+      scope,
       companyId: decoded.companyId || null,
       department: decoded.department || null,
     };
@@ -73,12 +84,14 @@ async function socketIdentity(socket, next) {
     let decoded;
     const token = socket.handshake.auth?.token;
 
-    if (!token) { 
-      // مؤقت: Fake User
+    if (!token) {
+      // TEMP: Fake User for testing
       decoded = {
         userId: "u123",
         name: "John Doe",
         role: "hr.employee",
+        jobTitle: "موظف",
+        scope: "Personal",
         companyId: "company1",
         department: "HR",
       };
@@ -86,9 +99,17 @@ async function socketIdentity(socket, next) {
       decoded = fakeDecodeToken(token);
     }
 
+    const mapping =
+      (decoded.jobTitle && roleMapping[decoded.jobTitle]) ||
+      roleMapping[decoded.role] ||
+      { chatRole: CHAT_ROLES.VISITOR, scope: "Limited" };
+
     const systemRole = decoded.role;
-    const chatRole = roleMapping[systemRole] || CHAT_ROLES.VISITOR;
-    const permissions = rolePermissions[chatRole] || [];
+    const chatRole = mapping.chatRole;
+    const scope = mapping.scope;
+
+    let permissions = rolePermissions[chatRole] || [];
+    permissions = filterPermissionsByScope(permissions, scope);
 
     let user = await User.findOne({ userId: decoded.userId });
     if (!user) {
@@ -97,10 +118,12 @@ async function socketIdentity(socket, next) {
         name: decoded.name,
         systemRole,
         chatRole,
+        scope,
       });
     } else {
       user.systemRole = systemRole;
       user.chatRole = chatRole;
+      user.scope = scope;
       await user.save();
     }
 
@@ -110,6 +133,7 @@ async function socketIdentity(socket, next) {
       systemRole,
       chatRole,
       permissions,
+      scope,
       companyId: decoded.companyId || null,
       department: decoded.department || null,
     };
@@ -122,7 +146,17 @@ async function socketIdentity(socket, next) {
 }
 
 // ===============================
-// Fake Decode (V1 only)
+// Filter Permissions by Scope
+// ===============================
+function filterPermissionsByScope(permissions, scope) {
+  if (scope === "Global") return permissions;
+
+  const restricted = ["VIEW_ALL_CONVERSATIONS"]; // مثال: ممنوع على غير Global
+  return permissions.filter(p => !restricted.includes(p));
+}
+
+// ===============================
+// Fake Decode Token (TEMP)
 // ===============================
 function fakeDecodeToken(token) {
   const parts = token.split(":");
@@ -130,8 +164,10 @@ function fakeDecodeToken(token) {
     userId: parts[0] || "u123",
     name: parts[1] || "John Doe",
     role: parts[2] || "hr.employee",
-    companyId: parts[3] || "company1",
-    department: parts[4] || "HR",
+    jobTitle: parts[3] || undefined,
+    scope: parts[4] || "Personal",
+    companyId: parts[5] || "company1",
+    department: parts[6] || "HR",
   };
 }
 
