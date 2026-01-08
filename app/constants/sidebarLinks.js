@@ -6,7 +6,8 @@ const CHAT = require("./chatRoles");
 
 module.exports = {
   [CHAT.OWNER]: [
-    { section: "Main", items: [{ id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" }] },
+    { section: "Main", items: [{ id: "dashboard", label: "لوحة التحكم", icon: "bi bi-grid-fill", path: "/dashboard" },
+   { id: "inbox", label: "المحادثات", icon: "bi bi-chat-dots-fill", path: "/owner/conversations" }] },
     { section: "Management", items: [
       { id: "users", label: "إدارة المستخدمين", icon: "bi bi-people-fill", path: "/users" },
       { id: "groups", label: "إدارة المجموعات", icon: "bi bi-collection-fill", path: "/groups" },

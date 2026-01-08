@@ -18,7 +18,7 @@ async function identityMiddleware(req, res, next) {
       decoded = {
         userId: "u123",
         name: "John Doe",
-        role: "hr.employee",
+        role: "company.owner",
         scope: "Personal",
         companyId: "company1",
         department: "HR",

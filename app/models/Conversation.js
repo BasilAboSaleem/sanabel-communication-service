@@ -9,6 +9,15 @@ const ConversationSchema = new mongoose.Schema(
     },
 
     title: { type: String }, // only for groups
+    participants: [{
+  userId: String,
+  chatRole: String,
+}],
+
+scope: {
+  type: String,
+  enum: ["Global", "Department", "Program", "Project", "Personal"],
+},
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

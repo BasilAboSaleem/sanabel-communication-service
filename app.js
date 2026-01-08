@@ -87,10 +87,12 @@ app.use(sidebarMiddleware);
 
 // ---------- Routes ----------
 const indexRoutes = require("./app/routes/index");
+const ownerRoutes = require("./app/routes/owner");
 
 // UI routes
 //app.use("/", dashboardRoutes);
 app.use('/', indexRoutes);
+app.use('/owner', ownerRoutes);
 
 // API routes (REST – secondary)
 //app.use("/api/chat", chatRoutes);
