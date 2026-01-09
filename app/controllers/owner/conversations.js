@@ -11,10 +11,12 @@ class ConversationsController {
         { title: "مجموعة الدعم", type: "group", lastUpdated: "أمس 14:20" },
         { title: "سارة حسين", type: "direct", lastUpdated: "أمس 09:15" },
         { title: "قسم التطوير", type: "group", lastUpdated: "قبل 3 أيام" },
+        
+    
       
     
     ];
-
+ 
       res.render('owner/conversations', { 
         conversations, // تمرير للـ EJS
         user
