@@ -7,59 +7,39 @@
   <%- include('../partials/sidebar.ejs') %>
 
   <div id="main" class="layout-navbar">
-       <header class="mb-3">
-                <a href="#" class="burger-btn d-block d-xl-none">
-                    <i class="bi bi-justify fs-3"></i>
-                </a>
-            </header>
+    <header class="mb-3">
+      <a href="#" class="burger-btn d-block d-xl-none">
+        <i class="bi bi-justify fs-3"></i>
+      </a>
+    </header>
 
-    <!-- Page Content -->
     <div class="page-content px-3 px-lg-5">
       <section class="section">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="fw-bolder">المحادثات</h3>
-          <button class="btn btn-primary rounded-pill shadow-sm"><i class="bi bi-plus-lg me-2"></i>محادثة جديدة</button>
+          <div>
+            <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#newGroupModal">
+              <i class="bi bi-people me-2"></i>مجموعة جديدة
+            </button>
+            <button class="btn btn-primary rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#newConversationModal">
+              <i class="bi bi-plus-lg me-2"></i>محادثة جديدة
+            </button>
+          </div>
         </div>
 
         <!-- Card Container -->
         <div class="card border-0 shadow-lg overflow-hidden" style="height: calc(100vh - 220px); border-radius: 24px;">
           <div class="row g-0 h-100">
-
             <!-- Sidebar: قائمة المحادثات -->
             <div class="col-lg-4 col-xxl-3 border-end d-flex flex-column">
               <div class="p-3 border-bottom bg-light">
-                <h5 class="mb-0 fw-bold">محادثاتي</h5>
+                <input type="text" id="search-conversations" class="form-control" placeholder="بحث في المحادثات...">
               </div>
               <div id="conversation-list" class="flex-grow-1 overflow-auto p-2">
-                <% if (conversations && conversations.length > 0) { %>
-                  <div class="list-group list-group-flush">
-                    <% conversations.forEach(conv => { %>
-                      <a href="#" class="list-group-item list-group-item-action conversation-item rounded-3 my-2 py-3"
-                         data-id="<%= conv._id %>" data-title="<%= conv.title || 'محادثة' %>" data-online="<%= conv.online || false %>">
-                        <div class="d-flex align-items-center">
-                          <div class="position-relative me-3">
-                            <img src="<%= conv.avatar || '/assets/compiled/jpg/1.jpg' %>" class="avatar avatar-md rounded-circle" alt="">
-                            <span class="position-absolute bottom-0 end-0 p-1 bg-<%= conv.online ? 'success' : 'secondary' %> rounded-circle border border-2 border-white"></span>
-                          </div>
-                          <div class="flex-grow-1 overflow-hidden">
-                            <h6 class="mb-1 text-truncate fw-bold"><%= conv.title || 'محادثة' %></h6>
-                            <p class="small text-muted mb-0 text-truncate"><%= conv.lastMessage || 'لا رسائل بعد' %></p>
-                          </div>
-                          <div class="text-end ms-2">
-                            <% if (conv.unread > 0) { %>
-                              <span class="badge bg-primary rounded-pill"><%= conv.unread %></span>
-                            <% } %>
-                          </div>
-                        </div>
-                      </a>
-                    <% }) %>
-                  </div>
-                <% } else { %>
-                  <div class="text-center text-muted p-5">
-                    <i class="bi bi-chat-dots fs-1 mb-3"></i>
-                    <p>لا توجد محادثات حالياً</p>
-                  </div>
-                <% } %>
+                <div class="text-center text-muted p-5" id="loading-conversations">
+                  <div class="spinner-border text-primary"></div>
+                  <p class="mt-2">جاري التحميل...</p>
+                </div>
               </div>
             </div>
 
@@ -72,10 +52,9 @@
                   <small id="chat-status" class="text-muted">غير متصل</small>
                 </div>
                 <div class="d-flex gap-2">
-                  <button class="btn btn-icon btn-outline-secondary rounded-circle"><i class="bi bi-search"></i></button>
-                  <button class="btn btn-icon btn-outline-secondary rounded-circle"><i class="bi bi-telephone"></i></button>
-                  <button class="btn btn-icon btn-outline-secondary rounded-circle"><i class="bi bi-camera-video"></i></button>
-                  <button class="btn btn-icon btn-outline-secondary rounded-circle"><i class="bi bi-three-dots-vertical"></i></button>
+                  <button class="btn btn-icon btn-outline-secondary rounded-circle" id="conversation-info-btn">
+                    <i class="bi bi-info-circle"></i>
+                  </button>
                 </div>
               </div>
 
@@ -88,17 +67,20 @@
                 </div>
               </div>
 
-              <!-- Input Area ثابت -->
+              <!-- Input Area -->
               <div id="chat-input-area" class="p-3 border-top" style="display: none;">
                 <div class="input-group input-group-lg rounded-pill overflow-hidden">
-                  <button class="btn btn-outline-secondary border-0" id="file-btn"><i class="bi bi-paperclip"></i></button>
+                  <button class="btn btn-outline-secondary border-0" id="file-btn">
+                    <i class="bi bi-paperclip"></i>
+                  </button>
                   <input type="file" id="file-input" style="display:none;">
-                  <button class="btn btn-outline-secondary border-0" id="emoji-btn"><i class="bi bi-emoji-smile"></i></button>
                   <input type="text" id="chat-input" class="form-control border-0" placeholder="اكتب رسالتك هنا..." disabled>
-                  <button class="btn btn-primary px-4" id="send-btn" disabled><i class="bi bi-send-fill"></i></button>
+                  <button class="btn btn-primary px-4" id="send-btn" disabled>
+                    <i class="bi bi-send-fill"></i>
+                  </button>
                 </div>
+                <div id="typing-indicator" class="text-muted small mt-2" style="display: none;"></div>
               </div>
-
             </div>
           </div>
         </div>
@@ -106,85 +88,271 @@
     </div>
 
     <footer class="text-center py-4 text-muted small">
-      2026 &copy; Sanabel Youth & Development Foundation
+      2026 &copy; مؤسسة السنابل للشباب والتنمية
     </footer>
   </div>
 </div>
 
-<!-- Scripts -->
-     <script src="/assets/static/js/components/dark.js"></script>
+<!-- Modal: محادثة جديدة -->
+<div class="modal fade" id="newConversationModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">محادثة جديدة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="new-conversation-form">
+          <div class="mb-3">
+            <label class="form-label">اختر المستخدم</label>
+            <input type="text" class="form-control" id="user-search" placeholder="ابحث عن مستخدم...">
+            <div id="user-results" class="mt-2"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="create-conversation-btn">إنشاء</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Modal: مجموعة جديدة -->
+<div class="modal fade" id="newGroupModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">مجموعة جديدة</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="new-group-form">
+          <div class="mb-3">
+            <label class="form-label">اسم المجموعة</label>
+            <input type="text" class="form-control" id="group-name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">النطاق</label>
+            <select class="form-select" id="group-scope">
+              <option value="Department">القسم</option>
+              <option value="Program">البرنامج</option>
+              <option value="Project">المشروع</option>
+              <option value="Personal">شخصي</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <button type="button" class="btn btn-primary" id="create-group-btn">إنشاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/static/js/components/dark.js"></script>
 <script src="/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js"></script>
 <script src="/assets/compiled/js/app.js"></script>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
+  // Socket.io Connection
+  const socket = io({
+    auth: {
+      token: '<%= user ? "Bearer " + (user.id + ":" + user.name + ":" + user.systemRole + ":" + user.scope) : "" %>'
+    }
+  });
+
+  const currentUser = {
+    id: '<%= user ? user.id : "" %>',
+    name: '<%= user ? user.name : "" %>'
+  };
+
+  let currentConversationId = null;
+  let conversations = [];
+  let typingTimeout = null;
+
   // PerfectScrollbar
   const convPS = new PerfectScrollbar('#conversation-list', { wheelPropagation: false });
   const messagesPS = new PerfectScrollbar('#chat-messages', { wheelPropagation: false });
 
-  const convItems = document.querySelectorAll('.conversation-item');
+  // DOM Elements
+  const conversationList = document.getElementById('conversation-list');
   const chatHeader = document.getElementById('chat-header');
-  const headerAvatar = document.getElementById('header-avatar');
   const chatTitle = document.getElementById('chat-title');
   const chatStatus = document.getElementById('chat-status');
   const chatMessages = document.getElementById('chat-messages');
   const chatInputArea = document.getElementById('chat-input-area');
   const chatInput = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-btn');
+  const typingIndicator = document.getElementById('typing-indicator');
 
-  let currentConvId = null;
-
-  convItems.forEach(item => {
-    item.addEventListener('click', async (e) => {
-      e.preventDefault();
-      convItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      currentConvId = item.dataset.id;
-      const title = item.dataset.title;
-      const online = item.dataset.online === 'true';
-
-      chatHeader.style.display = 'flex';
-      chatInputArea.style.display = 'block';
-      chatInput.disabled = false;
-      sendBtn.disabled = false;
-
-      chatTitle.textContent = title;
-      chatStatus.textContent = online ? 'متصل الآن' : 'غير متصل';
-      chatStatus.className = online ? 'text-success fw-bold' : 'text-muted';
-
-      headerAvatar.src = item.querySelector('img').src;
-
-      chatMessages.innerHTML = '<div class="text-center my-5"><div class="spinner-border text-primary"></div></div>';
-
-      try {
-        const res = await fetch(`/api/conversations/${currentConvId}/messages?limit=50`);
-        const data = await res.json();
-
-        chatMessages.innerHTML = '';
-        if (data.messages && data.messages.length > 0) {
-          data.messages.forEach(msg => appendMessage(msg));
-        } else {
-          chatMessages.innerHTML = '<div class="text-center text-muted my-5">ابدأ المحادثة الآن!</div>';
-        }
-        messagesPS.update();
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      } catch (err) {
-        chatMessages.innerHTML = '<div class="text-center text-danger my-5">فشل تحميل الرسائل</div>';
-      }
-    });
+  // Socket Events
+  socket.on('connect', () => {
+    console.log('✅ Connected to server');
+    loadConversations();
   });
 
+  socket.on('welcome', (data) => {
+    console.log('Welcome:', data);
+  });
+
+  socket.on('new_message', (data) => {
+    if (data.conversationId === currentConversationId) {
+      appendMessage(data.message);
+    } else {
+      // تحديث قائمة المحادثات
+      updateConversationInList(data.conversationId, data.message);
+    }
+  });
+
+  socket.on('message_updated', (data) => {
+    if (data.conversationId === currentConversationId) {
+      updateMessageInChat(data.messageId, data.content);
+    }
+  });
+
+  socket.on('message_deleted', (data) => {
+    if (data.conversationId === currentConversationId) {
+      removeMessageFromChat(data.messageId);
+    }
+  });
+
+  socket.on('conversation_updated', (data) => {
+    updateConversationInList(data.conversationId, { content: data.lastMessage });
+  });
+
+  socket.on('user_typing', (data) => {
+    if (data.conversationId === currentConversationId) {
+      showTypingIndicator(data.userName);
+    }
+  });
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+    alert('خطأ: ' + error.message);
+  });
+
+  // Load Conversations
+  async function loadConversations() {
+    try {
+      const res = await fetch('/api/conversations');
+      const data = await res.json();
+      conversations = data;
+      renderConversations(data);
+      document.getElementById('loading-conversations').style.display = 'none';
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+      conversationList.innerHTML = '<div class="text-center text-danger p-5">فشل تحميل المحادثات</div>';
+    }
+  }
+
+  // Render Conversations
+  function renderConversations(convs) {
+    if (!convs || convs.length === 0) {
+      conversationList.innerHTML = `
+        <div class="text-center text-muted p-5">
+          <i class="bi bi-chat-dots fs-1 mb-3"></i>
+          <p>لا توجد محادثات حالياً</p>
+        </div>
+      `;
+      return;
+    }
+
+    const html = convs.map(conv => {
+      const title = conv.title || conv.participants?.find(p => p.userId !== currentUser.id)?.name || 'محادثة';
+      const lastMsg = conv.lastMessage || 'لا رسائل بعد';
+      const time = conv.lastMessageTime ? new Date(conv.lastMessageTime).toLocaleDateString('ar') : '';
+      
+      return `
+        <a href="#" class="list-group-item list-group-item-action conversation-item rounded-3 my-2 py-3"
+           data-id="${conv._id}" data-title="${title}">
+          <div class="d-flex align-items-center">
+            <div class="position-relative me-3">
+              <img src="/assets/compiled/jpg/1.jpg" class="avatar avatar-md rounded-circle" alt="">
+            </div>
+            <div class="flex-grow-1 overflow-hidden">
+              <h6 class="mb-1 text-truncate fw-bold">${title}</h6>
+              <p class="small text-muted mb-0 text-truncate">${lastMsg}</p>
+            </div>
+            <div class="text-end ms-2">
+              <small class="text-muted">${time}</small>
+            </div>
+          </div>
+        </a>
+      `;
+    }).join('');
+
+    conversationList.innerHTML = `<div class="list-group list-group-flush">${html}</div>`;
+    
+    // Add click handlers
+    document.querySelectorAll('.conversation-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectConversation(item.dataset.id, item.dataset.title);
+      });
+    });
+
+    convPS.update();
+  }
+
+  // Select Conversation
+  async function selectConversation(conversationId, title) {
+    currentConversationId = conversationId;
+    
+    // Update UI
+    document.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+    document.querySelector(`[data-id="${conversationId}"]`)?.classList.add('active');
+    
+    chatHeader.style.display = 'flex';
+    chatInputArea.style.display = 'block';
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+    
+    chatTitle.textContent = title;
+    chatStatus.textContent = 'متصل';
+    chatStatus.className = 'text-success fw-bold';
+
+    // Join conversation room
+    socket.emit('join_conversation', { conversationId });
+
+    // Load messages
+    chatMessages.innerHTML = '<div class="text-center my-5"><div class="spinner-border text-primary"></div></div>';
+
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}/messages?limit=50`);
+      const data = await res.json();
+
+      chatMessages.innerHTML = '';
+      if (data.messages && data.messages.length > 0) {
+        data.messages.forEach(msg => appendMessage(msg));
+      } else {
+        chatMessages.innerHTML = '<div class="text-center text-muted my-5">ابدأ المحادثة الآن!</div>';
+      }
+      messagesPS.update();
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      chatMessages.innerHTML = '<div class="text-center text-danger my-5">فشل تحميل الرسائل</div>';
+    }
+  }
+
+  // Append Message
   function appendMessage(msg) {
-    const isMe = msg.senderId === '<%= user.id %>';
+    const isMe = msg.senderId === currentUser.id;
+    const senderName = msg.senderName || msg.sender || 'مستخدم';
+    const time = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'}) : new Date().toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'});
+    
     const bubble = document.createElement('div');
     bubble.className = `d-flex ${isMe ? 'justify-content-end' : 'justify-content-start'} mb-3`;
+    bubble.id = `message-${msg._id}`;
     bubble.innerHTML = `
-      <div class="${isMe ? 'ms-3' : 'me-3'}">
-        <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-primary text-white' : 'bg-light text-dark'}" style="max-width:70%; border-radius:16px;">
-          ${!isMe ? `<small class="fw-bold d-block mb-1">${msg.sender}</small>` : ''}
+      <div class="${isMe ? 'ms-3' : 'me-3'}" style="max-width: 70%;">
+        <div class="p-3 rounded-3 shadow-sm ${isMe ? 'bg-primary text-white' : 'bg-light text-dark'}" style="border-radius:16px;">
+          ${!isMe ? `<small class="fw-bold d-block mb-1">${senderName}</small>` : ''}
           <p class="mb-1">${msg.content}</p>
-          <small class="d-block text-end ${isMe ? 'text-white-50' : 'text-muted'}">${msg.time}</small>
+          <small class="d-block text-end ${isMe ? 'text-white-50' : 'text-muted'}">${time}</small>
         </div>
       </div>
     `;
@@ -193,25 +361,104 @@
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  function sendMessage() {
+  // Send Message
+  async function sendMessage() {
     const content = chatInput.value.trim();
-    if (!content || !currentConvId) return;
+    if (!content || !currentConversationId) return;
 
-    appendMessage({ senderId: '<%= user.id %>', sender: 'أنت', content, time: new Date().toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'}) });
-    chatInput.value = '';
+    // Disable input
+    chatInput.disabled = true;
+    sendBtn.disabled = true;
+
+    try {
+      // Send via Socket
+      socket.emit('send_message', {
+        conversationId: currentConversationId,
+        content: content
+      });
+
+      chatInput.value = '';
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('فشل إرسال الرسالة');
+    } finally {
+      chatInput.disabled = false;
+      sendBtn.disabled = false;
+      chatInput.focus();
+    }
   }
 
+  // Typing Indicator
+  function showTypingIndicator(userName) {
+    typingIndicator.textContent = `${userName} يكتب...`;
+    typingIndicator.style.display = 'block';
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      typingIndicator.style.display = 'none';
+    }, 3000);
+  }
+
+  // Event Listeners
   sendBtn.addEventListener('click', sendMessage);
-  chatInput.addEventListener('keypress', e => { if(e.key==='Enter') sendMessage(); });
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    } else {
+      // Typing indicator
+      socket.emit('typing', {
+        conversationId: currentConversationId,
+        isTyping: true
+      });
+    }
+  });
+
+  chatInput.addEventListener('blur', () => {
+    socket.emit('typing', {
+      conversationId: currentConversationId,
+      isTyping: false
+    });
+  });
+
+  // Update conversation in list
+  function updateConversationInList(conversationId, message) {
+    const item = document.querySelector(`[data-id="${conversationId}"]`);
+    if (item) {
+      const lastMsgEl = item.querySelector('.text-muted');
+      if (lastMsgEl) {
+        lastMsgEl.textContent = message.content || message;
+      }
+    }
+  }
+
+  // Update message in chat
+  function updateMessageInChat(messageId, content) {
+    const msgEl = document.getElementById(`message-${messageId}`);
+    if (msgEl) {
+      const contentEl = msgEl.querySelector('p');
+      if (contentEl) {
+        contentEl.textContent = content;
+        contentEl.parentElement.querySelector('small').textContent += ' (معدل)';
+      }
+    }
+  }
+
+  // Remove message from chat
+  function removeMessageFromChat(messageId) {
+    const msgEl = document.getElementById(`message-${messageId}`);
+    if (msgEl) {
+      msgEl.remove();
+    }
+  }
 </script>
 
 <style>
   .avatar-md { width:48px; height:48px; object-fit:cover; }
-  .chat-area { background: #f8f9fa; display:flex; flex-direction:column; height:100%; }
   #chat-messages { flex-grow:1; overflow:auto; }
   #conversation-list { height:100%; overflow:auto; }
-  .conversation-item.active { background-color:#6366f1; color:white !important; }
+  .conversation-item.active { background-color:#6366f1 !important; color:white !important; }
   .conversation-item.active * { color:white !important; }
+  .conversation-item:hover { background-color: #f8f9fa; }
 </style>
 </body>
 </html>

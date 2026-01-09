@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="light">
+<%- include('./partials/head.ejs') %>
+<body>
+<script src="/assets/static/js/initTheme.js"></script>
+<div id="app">
+  <%- include('./partials/sidebar.ejs') %>
+
+  <div id="main" class="layout-navbar">
+    <header class="mb-3">
+      <a href="#" class="burger-btn d-block d-xl-none">
+        <i class="bi bi-justify fs-3"></i>
+      </a>
+    </header>
+
+    <div class="page-heading">
+      <h3>لوحة التحكم</h3>
+    </div>
+
+    <div class="page-content px-3 px-lg-5">
+      <section class="row">
+        <!-- إحصائيات -->
+        <div class="col-12 col-lg-9">
+          <div class="row">
+            <div class="col-6 col-lg-3 col-md-6">
+              <div class="card">
+                <div class="card-body px-4 py-4-5">
+                  <div class="row">
+                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                      <div class="stats-icon purple mb-2">
+                        <i class="bi bi-chat-dots-fill"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                      <h6 class="text-muted font-semibold">المحادثات</h6>
+                      <h6 class="font-extrabold mb-0"><%= stats.conversationsCount %></h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+              <div class="card">
+                <div class="card-body px-4 py-4-5">
+                  <div class="row">
+                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                      <div class="stats-icon blue mb-2">
+                        <i class="bi bi-people-fill"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                      <h6 class="text-muted font-semibold">المجموعات</h6>
+                      <h6 class="font-extrabold mb-0"><%= stats.groupsCount %></h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+              <div class="card">
+                <div class="card-body px-4 py-4-5">
+                  <div class="row">
+                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                      <div class="stats-icon green mb-2">
+                        <i class="bi bi-envelope-fill"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                      <h6 class="text-muted font-semibold">رسائل غير مقروءة</h6>
+                      <h6 class="font-extrabold mb-0"><%= stats.unreadMessages %></h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-lg-3 col-md-6">
+              <div class="card">
+                <div class="card-body px-4 py-4-5">
+                  <div class="row">
+                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                      <div class="stats-icon red mb-2">
+                        <i class="bi bi-person-fill"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                      <h6 class="text-muted font-semibold">الدور</h6>
+                      <h6 class="font-extrabold mb-0"><%= user.chatRole %></h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- المحادثات الأخيرة -->
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h4>المحادثات الأخيرة</h4>
+                  <a href="/owner/conversations" class="btn btn-sm btn-primary">عرض الكل</a>
+                </div>
+                <div class="card-body">
+                  <% if (recentConversations && recentConversations.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                      <% recentConversations.forEach(conv => { %>
+                        <a href="/owner/conversations?conversation=<%= conv._id %>" class="list-group-item list-group-item-action">
+                          <div class="d-flex align-items-center">
+                            <div class="avatar avatar-md me-3">
+                              <img src="/assets/compiled/jpg/1.jpg" alt="Avatar">
+                            </div>
+                            <div class="flex-grow-1">
+                              <h6 class="mb-1"><%= conv.title || 'محادثة' %></h6>
+                              <p class="text-muted small mb-0"><%= conv.lastMessage || 'لا رسائل بعد' %></p>
+                            </div>
+                            <div class="text-muted small">
+                              <%= new Date(conv.updatedAt).toLocaleDateString('ar') %>
+                            </div>
+                          </div>
+                        </a>
+                      <% }) %>
+                    </div>
+                  <% } else { %>
+                    <div class="text-center text-muted py-5">
+                      <i class="bi bi-chat-dots fs-1 mb-3"></i>
+                      <p>لا توجد محادثات حالياً</p>
+                      <a href="/owner/conversations" class="btn btn-primary">بدء محادثة جديدة</a>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- معلومات المستخدم -->
+        <div class="col-12 col-lg-3">
+          <div class="card">
+            <div class="card-body py-4 px-4">
+              <div class="d-flex align-items-center">
+                <div class="avatar avatar-xl">
+                  <img src="/assets/compiled/jpg/1.jpg" alt="<%= user.name %>">
+                </div>
+                <div class="ms-3 name">
+                  <h5 class="font-bold"><%= user.name %></h5>
+                  <h6 class="text-muted mb-0"><%= user.chatRole %></h6>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- إجراءات سريعة -->
+          <div class="card mt-3">
+            <div class="card-header">
+              <h4>إجراءات سريعة</h4>
+            </div>
+            <div class="card-body">
+              <a href="/owner/conversations" class="btn btn-primary w-100 mb-2">
+                <i class="bi bi-chat-dots me-2"></i>محادثة جديدة
+              </a>
+              <a href="/groups" class="btn btn-outline-primary w-100 mb-2">
+                <i class="bi bi-people me-2"></i>إنشاء مجموعة
+              </a>
+              <a href="/groups" class="btn btn-outline-secondary w-100">
+                <i class="bi bi-collection me-2"></i>مجموعاتي
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="text-center py-4 text-muted small">
+      2026 &copy; مؤسسة السنابل للشباب والتنمية
+    </footer>
+  </div>
+</div>
+
+<script src="/assets/static/js/components/dark.js"></script>
+<script src="/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+<script src="/assets/compiled/js/app.js"></script>
+</body>
+</html>

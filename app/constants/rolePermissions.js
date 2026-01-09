@@ -1,43 +1,78 @@
-// ===========================
-// Permissions حسب Chat Role (قبل تصفية الـ Scope)
-// ===========================
-
-const P = require("./permissions");
-const CHAT = require("./chatRoles");
+const CHAT_ROLES = require('./chatRoles');
+const P = require('./permissions');
 
 module.exports = {
-  [CHAT.OWNER]: Object.values(P), // كل الصلاحيات
+  [CHAT_ROLES.OWNER]: [
+    // Groups
+    P.GROUP_CREATE,
+    P.GROUP_VIEW,
+    P.GROUP_UPDATE,
+    P.GROUP_DELETE,
+    P.GROUP_ARCHIVE,
+    P.GROUP_ADD_MEMBER,
+    P.GROUP_REMOVE_MEMBER,
 
-  [CHAT.ADMIN]: [
-    P.CREATE_CONVERSATION,
-    P.CREATE_GROUP,
-    P.CREATE_DEPARTMENT_GROUP,
-    P.ADD_MEMBER,
-    P.REMOVE_MEMBER,
-    P.VIEW_ALL_CONVERSATIONS,
-    P.VIEW_DEPARTMENT_CONVERSATIONS,
-    P.VIEW_AUDIT_LOGS,
-    P.SEND_MESSAGE,
+    // Messages
+    P.MESSAGE_SEND,
+    P.MESSAGE_VIEW,
+    P.MESSAGE_UPDATE,
+    P.MESSAGE_DELETE,
+
+    // Conversations
+    P.CONVERSATION_CREATE,
+    P.CONVERSATION_VIEW,
+    P.CONVERSATION_ARCHIVE,
+    P.CONVERSATION_MANAGE_PARTICIPANTS,
+
+    // System
+    P.SYSTEM_VIEW_AUDIT_LOGS,
+    P.SYSTEM_MANAGE_SETTINGS,
   ],
 
-  [CHAT.SUPERVISOR]: [
-    P.CREATE_CONVERSATION,
-    P.CREATE_GROUP,
-    P.CREATE_PROGRAM_GROUP,
-    P.CREATE_PROJECT_GROUP,
-    P.ADD_MEMBER,
-    P.REMOVE_MEMBER,
-    P.VIEW_PROGRAM_CONVERSATIONS,
-    P.VIEW_PROJECT_CONVERSATIONS,
-    P.SEND_MESSAGE,
+  [CHAT_ROLES.ADMIN]: [
+    // Groups
+    P.GROUP_CREATE,
+    P.GROUP_VIEW,
+    P.GROUP_UPDATE,
+    P.GROUP_ADD_MEMBER,
+    P.GROUP_REMOVE_MEMBER,
+
+    // Messages
+    P.MESSAGE_SEND,
+    P.MESSAGE_VIEW,
+    P.MESSAGE_UPDATE,
+    P.MESSAGE_DELETE,
+
+    // Conversations
+    P.CONVERSATION_CREATE,
+    P.CONVERSATION_VIEW,
+    P.CONVERSATION_MANAGE_PARTICIPANTS,
   ],
 
-  [CHAT.USER]: [
-    P.CREATE_CONVERSATION,
-    P.SEND_MESSAGE,
+  [CHAT_ROLES.MODERATOR]: [
+    // Groups
+    P.GROUP_VIEW,
+    P.GROUP_ADD_MEMBER,
+
+    // Messages
+    P.MESSAGE_SEND,
+    P.MESSAGE_VIEW,
+    P.MESSAGE_UPDATE,
+    P.MESSAGE_DELETE,
   ],
 
-  [CHAT.VISITOR]: [
-    P.SEND_MESSAGE, // محدود جداً (فقط مع supervisor)
+  [CHAT_ROLES.MEMBER]: [
+    // Groups
+    P.GROUP_VIEW,
+
+    // Messages
+    P.MESSAGE_SEND,
+    P.MESSAGE_VIEW,
+    P.MESSAGE_UPDATE,
+  ],
+
+  [CHAT_ROLES.VISITOR]: [
+    // Read only
+    P.GROUP_VIEW,
   ],
 };

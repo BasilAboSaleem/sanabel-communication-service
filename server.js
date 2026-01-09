@@ -41,33 +41,65 @@ const { socketIdentity } = require("./app/middlewares/identity");
 io.use(socketIdentity);
 
 // Socket Event Handlers
+const messageHandlers = require("./app/sockets/messageHandlers");
+
 io.on("connection", (socket) => {
   console.log(`🟢 User connected: ${socket.user.name} (${socket.user.chatRole})`);
 
   // Join personal room
   socket.join(socket.user.id);
 
-  // Example: send welcome
-  socket.emit("welcome", `Hello ${socket.user.name}, welcome to Sanabel Chat`);
-
-  // Handle direct message
-  socket.on("direct_message", async (data) => {
-    try {
-      // TODO: Implement permission check + service call
-      console.log(`Message from ${socket.user.name} to ${data.to}: ${data.message}`);
-      // Emit to recipient room
-      io.to(data.to).emit("direct_message", {
-        from: socket.user.id,
-        message: data.message,
-        timestamp: new Date(),
-      });
-    } catch (err) {
-      console.error(err);
-      socket.emit("error", "Failed to send message");
-    }
+  // Welcome message
+  socket.emit("welcome", {
+    message: `مرحباً ${socket.user.name}، أهلاً بك في نظام التواصل`,
+    user: {
+      id: socket.user.id,
+      name: socket.user.name,
+      chatRole: socket.user.chatRole,
+    },
   });
 
-  // Handle disconnect
+  // ===========================
+  // Conversation Events
+  // ===========================
+  
+  // Join conversation room
+  socket.on("join_conversation", async (data) => {
+    await messageHandlers.handleJoinConversation(socket, data.conversationId);
+  });
+
+  // Leave conversation room
+  socket.on("leave_conversation", (data) => {
+    messageHandlers.handleLeaveConversation(socket, data.conversationId);
+  });
+
+  // ===========================
+  // Message Events
+  // ===========================
+
+  // Send message
+  socket.on("send_message", async (data) => {
+    await messageHandlers.handleSendMessage(socket, io, data);
+  });
+
+  // Update message
+  socket.on("update_message", async (data) => {
+    await messageHandlers.handleUpdateMessage(socket, io, data);
+  });
+
+  // Delete message
+  socket.on("delete_message", async (data) => {
+    await messageHandlers.handleDeleteMessage(socket, io, data);
+  });
+
+  // Typing indicator
+  socket.on("typing", (data) => {
+    messageHandlers.handleTyping(socket, io, data);
+  });
+
+  // ===========================
+  // Disconnect
+  // ===========================
   socket.on("disconnect", () => {
     console.log(`🔴 User disconnected: ${socket.user.name}`);
   });

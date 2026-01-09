@@ -88,14 +88,20 @@ app.use(sidebarMiddleware);
 // ---------- Routes ----------
 const indexRoutes = require("./app/routes/index");
 const ownerRoutes = require("./app/routes/owner");
+const dashboardRoutes = require("./app/routes/dashboard");
+const groupsPageRoutes = require("./app/routes/groups");
+const conversationRoutes = require("./app/routes/conversationRoutes");
+const groupRoutes = require("./app/routes/groupRoutes");
 
 // UI routes
-//app.use("/", dashboardRoutes);
 app.use('/', indexRoutes);
+app.use('/dashboard', dashboardRoutes);
 app.use('/owner', ownerRoutes);
+app.use('/groups', groupsPageRoutes);
 
-// API routes (REST – secondary)
-//app.use("/api/chat", chatRoutes);
+// API routes
+app.use("/api/conversations", conversationRoutes);
+app.use("/api/groups", groupRoutes);
 
 // ---------- Health Check ----------
 app.get("/api/health", (req, res) => {

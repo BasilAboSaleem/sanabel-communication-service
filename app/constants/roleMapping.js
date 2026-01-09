@@ -1,50 +1,44 @@
 // ===========================
-// Role Mapping: System Role → Chat Role
-// Source of truth: token.role + token.scope
+// Role Mapping
+// System Role (from token) → Chat Role (internal)
 // ===========================
 
-const CHAT = require("./chatRoles");
+const CHAT_ROLES = require('./chatRoles');
 
 module.exports = {
   // ===========================
-  // Company Level
+  // Top Management
   // ===========================
-  "company.owner": {
-    chatRole: CHAT.OWNER,
+  boss: {
+    chatRole: CHAT_ROLES.OWNER,
   },
 
   // ===========================
-  // Program Level
+  // HR Management
   // ===========================
-  "program.manager": {
-    chatRole: CHAT.SUPERVISOR,
+  'hr.manager': {
+    chatRole: CHAT_ROLES.ADMIN,
   },
 
-  // ===========================
-  // Department Level
-  // ===========================
-  "hr.manager": {
-    chatRole: CHAT.ADMIN,
+  'hr.employee.manager': {
+    chatRole: CHAT_ROLES.MODERATOR,
   },
 
-  // ===========================
-  // Project Level
-  // ===========================
-  "project.manager": {
-    chatRole: CHAT.SUPERVISOR,
+  'hr.deputy': {
+    chatRole: CHAT_ROLES.MODERATOR,
   },
 
   // ===========================
   // Employees
   // ===========================
-  "hr.employee": {
-    chatRole: CHAT.USER,
+  'hr.employee': {
+    chatRole: CHAT_ROLES.MEMBER,
   },
 
   // ===========================
-  // Visitors / External
+  // External / Visitor
   // ===========================
-  "visitor": {
-    chatRole: CHAT.VISITOR,
+  visitor: {
+    chatRole: CHAT_ROLES.VISITOR,
   },
 };

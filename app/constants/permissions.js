@@ -1,20 +1,45 @@
-// ===========================
-// Permissions لنظام التواصل
-// ===========================
+/**
+ * Permissions List
+ * -----------------
+ * All permissions used across the system
+ * Naming Convention:
+ *   DOMAIN_ACTION
+ *   مثال: GROUP_CREATE
+ */
 
 module.exports = {
-  CREATE_CONVERSATION: "create_conversation",
-  SEND_MESSAGE: "send_message",
-  CREATE_GROUP: "create_group",
-  CREATE_DEPARTMENT_GROUP: "create_department_group",
-  CREATE_PROGRAM_GROUP: "create_program_group",
-  CREATE_PROJECT_GROUP: "create_project_group",
-  ADD_MEMBER: "add_member",
-  REMOVE_MEMBER: "remove_member",
-  VIEW_ALL_CONVERSATIONS: "view_all_conversations",     // فقط Global
-  VIEW_DEPARTMENT_CONVERSATIONS: "view_department_conversations",
-  VIEW_PROGRAM_CONVERSATIONS: "view_program_conversations",
-  VIEW_PROJECT_CONVERSATIONS: "view_project_conversations",
-  VIEW_AUDIT_LOGS: "view_audit_logs",                    // فقط Owner/Admin
-  MANAGE_USERS: "manage_users",                         // Owner فقط
+  // =========================
+  // Groups (Programs / Departments / Custom)
+  // =========================
+  GROUP_CREATE: 'GROUP_CREATE',
+  GROUP_VIEW: 'GROUP_VIEW',
+  GROUP_UPDATE: 'GROUP_UPDATE',
+  GROUP_DELETE: 'GROUP_DELETE',
+  GROUP_ARCHIVE: 'GROUP_ARCHIVE',
+
+  GROUP_ADD_MEMBER: 'GROUP_ADD_MEMBER',
+  GROUP_REMOVE_MEMBER: 'GROUP_REMOVE_MEMBER',
+  GROUP_VIEW_MEMBERS: 'GROUP_VIEW_MEMBERS',
+
+  // =========================
+  // Messages
+  // =========================
+  MESSAGE_SEND: 'MESSAGE_SEND',
+  MESSAGE_VIEW: 'MESSAGE_VIEW',
+  MESSAGE_UPDATE: 'MESSAGE_UPDATE',
+  MESSAGE_DELETE: 'MESSAGE_DELETE',
+
+  // =========================
+  // Conversations
+  // =========================
+  CONVERSATION_CREATE: 'CONVERSATION_CREATE',
+  CONVERSATION_VIEW: 'CONVERSATION_VIEW',
+  CONVERSATION_ARCHIVE: 'CONVERSATION_ARCHIVE',
+  CONVERSATION_MANAGE_PARTICIPANTS: 'CONVERSATION_MANAGE_PARTICIPANTS',
+
+  // =========================
+  // System / Admin
+  // =========================
+  SYSTEM_VIEW_AUDIT_LOGS: 'SYSTEM_VIEW_AUDIT_LOGS',
+  SYSTEM_MANAGE_SETTINGS: 'SYSTEM_MANAGE_SETTINGS',
 };
